@@ -104,7 +104,7 @@
 #define BOARD_SCOOVO_X9H        321   // abee Scoovo X9H
 #define BOARD_GT2560_REV_A      74    // Geeetech GT2560 Rev. A
 #define BOARD_GT2560_REV_A_PLUS 75    // Geeetech GT2560 Rev. A+ (with auto level probe)
-#define BOARD_ONEPLUS1_wanhao   511   // Wanhao ONEPLUS1
+#define BOARD_ONEPLUS1_WANHAO   511   // Wanhao ONEPLUS1
 
 //
 // ATmega1281, ATmega2561
