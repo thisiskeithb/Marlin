@@ -181,8 +181,8 @@
   #include "pins_GT2560_REV_A.h"      // ATmega1280, ATmega2560                     env:megaatmega1280 env:megaatmega2560
 #elif MB(GT2560_REV_A_PLUS)
   #include "pins_GT2560_REV_A_PLUS.h" // ATmega1280, ATmega2560                     env:megaatmega1280 env:megaatmega2560
-#elif MB(ONEPLUS1_wanhao)
-  #include "pins_ONEPLUS1_wanhao.h"   // ATmega2560                                 env:megaatmega2560
+#elif MB(ONEPLUS1_WANHAO)
+  #include "pins_ONEPLUS1_WANHAO.h"   // ATmega2560                                 env:megaatmega2560
 
 //
 // ATmega1281, ATmega2561
