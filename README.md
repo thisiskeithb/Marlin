@@ -4,4 +4,4 @@
 
 ## Additional Information
 
-This firmware is configured for the Wanhao Duplicator i3 Mini and has pre-built configurations for the Cocoon Create Model Maker & Monoprice MP i3 Mini in the example_configurations folder.
+This firmware is configured for the Wanhao Duplicator i3 Mini and has pre-built configurations (and bootscreens) for the Cocoon Create Model Maker & Monoprice MP i3 Mini in the example_configurations folder.
