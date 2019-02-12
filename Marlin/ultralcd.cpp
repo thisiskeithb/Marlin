@@ -472,7 +472,7 @@ uint16_t max_display_update_time = 0;
     constexpr bool processing_manual_move = false;
   #endif
 
-  #if PIN_EXISTS(SD_DETECT)
+  #if PIN_EXISTS(SD_DETECT)||defined(SD_DETECT_BYMYSELF)
     uint8_t lcd_sd_status;
   #endif
 
@@ -505,7 +505,7 @@ uint16_t max_display_update_time = 0;
           if (currentScreen == lcd_status_screen)
             doubleclick_expire_ms = millis() + DOUBLECLICK_MAX_INTERVAL;
         }
-        else if (screen == lcd_status_screen && currentScreen == lcd_main_menu && PENDING(millis(), doubleclick_expire_ms) && (planner.movesplanned() || IS_SD_PRINTING()))
+        else if (screen == lcd_status_screen && currentScreen == lcd_main_menu && PENDING(millis(), doubleclick_expire_ms) && (planner.movesplanned() || IS_SD_PRINTING))
           screen =
             #if ENABLED(BABYSTEP_ZPROBE_OFFSET)
               lcd_babystep_zoffset
@@ -652,7 +652,7 @@ void lcd_status_screen() {
 
   #if ENABLED(LCD_SET_PROGRESS_MANUALLY) && ENABLED(SDSUPPORT) && (ENABLED(LCD_PROGRESS_BAR) || ENABLED(DOGLCD))
     // Progress bar % comes from SD when actively printing
-    if (IS_SD_PRINTING())
+    if (IS_SD_PRINTING)
       progress_bar_percent = card.percentDone();
   #endif
 
@@ -854,9 +854,11 @@ void lcd_quick_feedback(const bool clear_buttons) {
       lcd_reset_status();
     }
 
+    bool abort_sd_printing; // =false
+
     void lcd_sdcard_stop() {
       wait_for_heatup = wait_for_user = false;
-      card.abort_sd_printing = true;
+      abort_sd_printing = true;
       lcd_setstatusPGM(PSTR(MSG_PRINT_ABORTED), -1);
       lcd_return_to_status();
     }
@@ -1107,7 +1109,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
         MENU_ITEM_EDIT_CALLBACK(bool, MSG_CASE_LIGHT, (bool*)&case_light_on, update_case_light);
     #endif
 
-    if (planner.movesplanned() || IS_SD_PRINTING())
+    if (planner.movesplanned() || IS_SD_PRINTING)
       MENU_ITEM(submenu, MSG_TUNE, lcd_tune_menu);
     else
       MENU_ITEM(submenu, MSG_PREPARE, lcd_prepare_menu);
@@ -1125,14 +1127,14 @@ void lcd_quick_feedback(const bool clear_buttons) {
         }
         else {
           MENU_ITEM(submenu, MSG_CARD_MENU, lcd_sdcard_menu);
-          #if !PIN_EXISTS(SD_DETECT)
+          #if !(PIN_EXISTS(SD_DETECT)||defined(SD_DETECT_BYMYSELF))
             MENU_ITEM(gcode, MSG_CNG_SDCARD, PSTR("M21"));  // SD-card changed by user
           #endif
         }
       }
       else {
         MENU_ITEM(submenu, MSG_NO_CARD, lcd_sdcard_menu);
-        #if !PIN_EXISTS(SD_DETECT)
+        #if !(PIN_EXISTS(SD_DETECT)||defined(SD_DETECT_BYMYSELF))
           MENU_ITEM(gcode, MSG_INIT_SDCARD, PSTR("M21")); // Manually initialize the SD-card via user interface
         #endif
       }
@@ -2730,7 +2732,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
     // Change filament
     //
     #if ENABLED(ADVANCED_PAUSE_FEATURE)
-      if (!IS_SD_FILE_OPEN()) {
+      if (!IS_SD_FILE_OPEN) {
         #if E_STEPPERS == 1 && !ENABLED(FILAMENT_LOAD_UNLOAD_GCODES)
           if (thermalManager.targetHotEnoughToExtrude(active_extruder))
             MENU_ITEM(gcode, MSG_FILAMENTCHANGE, PSTR("M600 B0"));
@@ -3958,7 +3960,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
 
   #if ENABLED(SDSUPPORT)
 
-    #if !PIN_EXISTS(SD_DETECT)
+    #if !(PIN_EXISTS(SD_DETECT)||defined(SD_DETECT_BYMYSELF))
       void lcd_sd_refresh() {
         card.initsd();
         encoderTopLine = 0;
@@ -4013,7 +4015,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
       MENU_BACK(MSG_MAIN);
       card.getWorkDirName();
       if (card.filename[0] == '/') {
-        #if !PIN_EXISTS(SD_DETECT)
+        #if !(PIN_EXISTS(SD_DETECT)||defined(SD_DETECT_BYMYSELF))
           MENU_ITEM(function, LCD_STR_REFRESH MSG_REFRESH, lcd_sd_refresh);
         #endif
       }
@@ -4409,7 +4411,7 @@ void lcd_quick_feedback(const bool clear_buttons) {
         #endif // E_STEPPERS == 1
 
         #if ENABLED(FILAMENT_LOAD_UNLOAD_GCODES)
-          if (!planner.movesplanned() && !IS_SD_FILE_OPEN()) {
+          if (!planner.movesplanned() && !IS_SD_FILE_OPEN) {
             // Load filament
             #if E_STEPPERS == 1
               PGM_P msg0 = PSTR(MSG_FILAMENTLOAD);
@@ -5039,7 +5041,12 @@ void lcd_init() {
 
   #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
     SET_INPUT_PULLUP(SD_DETECT_PIN);
+    WRITE(SD_DETECT_PIN, HIGH);
     lcd_sd_status = 2; // UNKNOWN
+  #elif defined(SD_DETECT_BYMYSELF)
+	  SD_DETECT_PIN_INIT;
+	  SD_DETECT_SET(HIGH);
+	  lcd_sd_status = 2;
   #endif
 
   #if ENABLED(LCD_HAS_SLOW_BUTTONS)
@@ -5156,7 +5163,7 @@ void lcd_update() {
 
   #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
 
-    const uint8_t sd_status = (uint8_t)IS_SD_INSERTED();
+    const uint8_t sd_status = (uint8_t)IS_SD_INSERTED;
     if (sd_status != lcd_sd_status && lcd_detected()) {
 
       uint8_t old_sd_status = lcd_sd_status; // prevent re-entry to this block!
@@ -5179,6 +5186,26 @@ void lcd_update() {
       lcd_implementation_init( // to maybe revive the LCD if static electricity killed it.
         #if ENABLED(LCD_PROGRESS_BAR)
           currentScreen == lcd_status_screen ? CHARSET_INFO : CHARSET_MENU
+        #endif
+      );
+    }
+  #elif defined(SD_DETECT_BYMYSELF)
+
+	bool sd_status = SD_DETECT_PIN_VAL;
+    if (sd_status != lcd_sd_status && lcd_detected()) {
+      if (sd_status) {
+        card.initsd();
+        if (lcd_sd_status != 2) LCD_MESSAGEPGM(MSG_SD_INSERTED);
+      }
+      else {
+        card.release();
+        if (lcd_sd_status != 2) LCD_MESSAGEPGM(MSG_SD_REMOVED);
+      }
+      lcd_sd_status = sd_status;
+      lcdDrawUpdate = LCDVIEW_CLEAR_CALL_REDRAW;
+      lcd_implementation_init(
+        #if ENABLED(LCD_PROGRESS_BAR)
+          currentScreen == lcd_status_screen
         #endif
       );
     }
