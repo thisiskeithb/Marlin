@@ -481,6 +481,126 @@ void menu_advanced_settings();
 
 #endif // CUSTOM_MENU_CONFIG
 
+#if ENABLED(SHEET_PROFILES_MENU)
+
+  void _lcd_sheet_menu_configuration_gcode(PGM_P const cmd) {
+    queue.inject_P(cmd);
+    TERN_(SHEET_PROFILES_SCRIPT_AUDIBLE_FEEDBACK, ui.completion_feedback());
+    TERN_(SHEET_PROFILES_SCRIPT_RETURN, ui.return_to_status());
+  }
+
+  void sheet_menu_configuration() {
+    START_MENU();
+    BACK_ITEM(MSG_MAIN);
+
+    #define HAS_SHEET_CONF(N) (defined(SHEET_##N##_DESC) && defined(SHEET_##N##_OFFSET))
+
+    #ifdef SHEET_PROFILES_SCRIPT_DONE
+      #define _DONE_SCRIPT "\n" SHEET_PROFILES_SCRIPT_DONE
+    #else
+      #define _DONE_SCRIPT ""
+    #endif
+
+    #if ENABLED(SHEET_PROFILES_SAVE_ON_LOAD)
+      #define _SAVE_SCRIPT "\nM500"
+    #else
+      #define _SAVE_SCRIPT ""
+    #endif
+
+    #define SHEET_GCODE_LAMBDA_CONF(N) []{ _lcd_sheet_menu_configuration_gcode(PSTR("M851 Z" STRINGIFY(SHEET_##N##_OFFSET) _SAVE_SCRIPT "\nM117 " SHEET_##N##_DESC " Sheet: " STRINGIFY(SHEET_##N##_OFFSET) _DONE_SCRIPT)); }
+    //#define _SHEET_CONF(N) ACTION_ITEM_P(PSTR(SHEET_##N##_DESC " Sheet: " STRINGIFY(SHEET_##N##_OFFSET)), SHEET_GCODE_LAMBDA_CONF(N));
+    #define _SHEET_CONF(N) ACTION_ITEM_P(PSTR(SHEET_##N##_DESC " Loaded"), SHEET_GCODE_LAMBDA_CONF(N));
+    #define _SHEET_CONF_CONFIRM(N)                                              \
+      SUBMENU_P(PSTR(SHEET_##N##_DESC ": " STRINGIFY(SHEET_##N##_OFFSET)), []{  \
+          MenuItem_confirm::confirm_screen(                                     \
+            SHEET_GCODE_LAMBDA_CONF(N),                                         \
+            ui.goto_previous_screen,                                            \
+            PSTR("Load " SHEET_##N##_DESC " Sheet?")                            \
+          );                                                                    \
+        })
+
+    #define SHEET_CONF(N) do{ if (ENABLED(SHEET_##N##_CONFIRM)) _SHEET_CONF_CONFIRM(N); else _SHEET_CONF(N); }while(0)
+
+    #if HAS_SHEET_CONF(1)
+      SHEET_CONF(1);
+    #endif
+    #if HAS_SHEET_CONF(2)
+      SHEET_CONF(2);
+    #endif
+    #if HAS_SHEET_CONF(3)
+      SHEET_CONF(3);
+    #endif
+    #if HAS_SHEET_CONF(4)
+      SHEET_CONF(4);
+    #endif
+    #if HAS_SHEET_CONF(5)
+      SHEET_CONF(5);
+    #endif
+    #if HAS_SHEET_CONF(6)
+      SHEET_CONF(6);
+    #endif
+    #if HAS_SHEET_CONF(7)
+      SHEET_CONF(7);
+    #endif
+    #if HAS_SHEET_CONF(8)
+      SHEET_CONF(8);
+    #endif
+    #if HAS_SHEET_CONF(9)
+      SHEET_CONF(9);
+    #endif
+    #if HAS_SHEET_CONF(10)
+      SHEET_CONF(10);
+    #endif
+    #if HAS_SHEET_CONF(11)
+      SHEET_CONF(11);
+    #endif
+    #if HAS_SHEET_CONF(12)
+      SHEET_CONF(12);
+    #endif
+    #if HAS_SHEET_CONF(13)
+      SHEET_CONF(13);
+    #endif
+    #if HAS_SHEET_CONF(14)
+      SHEET_CONF(14);
+    #endif
+    #if HAS_SHEET_CONF(15)
+      SHEET_CONF(15);
+    #endif
+    #if HAS_SHEET_CONF(16)
+      SHEET_CONF(16);
+    #endif
+    #if HAS_SHEET_CONF(17)
+      SHEET_CONF(17);
+    #endif
+    #if HAS_SHEET_CONF(18)
+      SHEET_CONF(18);
+    #endif
+    #if HAS_SHEET_CONF(19)
+      SHEET_CONF(19);
+    #endif
+    #if HAS_SHEET_CONF(20)
+      SHEET_CONF(20);
+    #endif
+    #if HAS_SHEET_CONF(21)
+      SHEET_CONF(21);
+    #endif
+    #if HAS_SHEET_CONF(22)
+      SHEET_CONF(22);
+    #endif
+    #if HAS_SHEET_CONF(23)
+      SHEET_CONF(23);
+    #endif
+    #if HAS_SHEET_CONF(24)
+      SHEET_CONF(24);
+    #endif
+    #if HAS_SHEET_CONF(25)
+      SHEET_CONF(25);
+    #endif
+    END_MENU();
+  }
+
+#endif // SHEET_PROFILES_MENU
+
 void menu_configuration() {
   const bool busy = printer_busy();
 
@@ -500,6 +620,16 @@ void menu_configuration() {
         SUBMENU_P(PSTR(CUSTOM_MENU_CONFIG_TITLE), custom_menus_configuration);
       #else
         SUBMENU(MSG_CUSTOM_COMMANDS, custom_menus_configuration);
+      #endif
+    }
+  #endif
+
+  #if ENABLED(SHEET_PROFILES_MENU)
+    if (TERN1(CUSTOM_MENU_CONFIG_ONLY_IDLE, !busy)) {
+      #ifdef SHEET_PROFILES_TITLE
+        SUBMENU_P(PSTR(SHEET_PROFILES_TITLE), sheet_menu_configuration);
+      #else
+        SUBMENU(MSG_SHEET_PROFILES, sheet_menu_configuration);
       #endif
     }
   #endif

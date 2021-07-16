@@ -3779,6 +3779,47 @@
 #endif
 
 /**
+ * Sheet Profiles
+ * *** Beta feature! ***
+ *
+ * Automatically adjust Z Probe Offset with M851 based on selected Sheet Profile.
+ *
+ * BABYSTEP_ZPROBE_OFFSET is currently required as it provides a simplified Z probe offset experience.
+ */
+#define SHEET_PROFILES_MENU
+#if BOTH(SHEET_PROFILES_MENU, BABYSTEP_ZPROBE_OFFSET)
+  //#define SHEET_PROFILES_TITLE "Sheet Profiles"
+  //#define SHEET_PROFILES_SCRIPT_DONE "M117 New Sheet Selected"
+  //#define SHEET_PROFILES_SCRIPT_AUDIBLE_FEEDBACK
+  #define SHEET_PROFILES_SCRIPT_RETURN    // Return to status screen after sheet is selected
+  #define SHEET_PROFILES_ONLY_IDLE        // Only show sheet profile menu when the machine is idle
+  #define SHEET_PROFILES_SAVE_ON_LOAD     // Send M500 after after sheet is selected
+
+  //
+  // Sheet Profiles - Up to 25 are supported without changes
+  //
+  #define SHEET_1_DESC    "Satin"    // Prusa Powder-coated Satin Spring Steel Sheet
+  #define SHEET_1_OFFSET     -1.18
+  #define SHEET_1_CONFIRM            // Show a confirmation dialog before this action
+
+  #define SHEET_2_DESC    "Ultistik" // ULTISTIK Premium Powder Coated Ultem (PEI) Build Plate
+  #define SHEET_2_OFFSET     -1.05
+  #define SHEET_2_CONFIRM
+
+  #define SHEET_3_DESC    "Smooth"   // Prusa Smooth PEI Spring Steel Sheet
+  #define SHEET_3_OFFSET     -0.08
+  #define SHEET_3_CONFIRM
+
+  #define SHEET_4_DESC    "Textured" // Prusa Textured PEI Spring Steel Sheet
+  #define SHEET_4_OFFSET     -1.0
+  #define SHEET_4_CONFIRM
+
+  #define SHEET_5_DESC    "Garolite" // Garolite/Phenolic LE attached to a generic spring steel sheet
+  #define SHEET_5_OFFSET     -1.2
+  #define SHEET_5_CONFIRM
+#endif
+
+/**
  * User-defined buttons to run custom G-code.
  * Up to 25 may be defined.
  */
