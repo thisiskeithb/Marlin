@@ -21,6 +21,8 @@
  */
 #pragma once
 
+#error "PrusaAIO is now maintained in a dedicated repository at: https://github.com/thisiskeithb/PrusaAIO"
+
 /**
  * Configuration.h
  *
