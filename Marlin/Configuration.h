@@ -37,6 +37,8 @@
  */
 #define CONFIGURATION_H_VERSION 02010300
 
+#error "DIY Prusa Mini is now maintained in a dedicated repository at: https://github.com/thisiskeithb/DIY-Prusa-Mini"
+
 //===========================================================================
 //============================= Getting Started =============================
 //===========================================================================
