@@ -876,3 +876,8 @@
 #if defined(ARDUINO_ARCH_HC32) && F_CPU == 200000000
   #warning "HC32 clock is assumed to be 200MHz. If this isn't the case for your board please submit a report so we can add support."
 #endif
+
+/**
+ * Warn users of personal config
+ */
+#warning "This is my (thisiskeithb) personal config and can change at any time. Verify settings match your hardware before flashing."
