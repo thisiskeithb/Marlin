@@ -928,3 +928,13 @@
 #if ALL(PELTIER_BED, PIDTEMPBED)
   #warning "PELTIER_BED with PIDTEMPBED requires extra circuitry. Use with caution."
 #endif
+
+/**
+ * Warn users of personal config
+ */
+#warning "This is my (thisiskeithb) personal config and can change at any time. Verify settings match your hardware before flashing."
+
+/**
+ * Please donate
+ */
+#warning "If you find this project helpful, please consider donating at https://github.com/sponsors/thisiskeithb or https://ko-fi.com/thisiskeithb"
