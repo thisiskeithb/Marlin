@@ -955,3 +955,6 @@
     #warning "SMOOTH_LIN_ADVANCE with MIXING_EXTRUDER is untested. Use with caution."
   #endif
 #endif
+
+// Warn users of personal config
+#warning "This is my (thisiskeithb) personal config and can change at any time. Verify settings match your hardware before flashing."
