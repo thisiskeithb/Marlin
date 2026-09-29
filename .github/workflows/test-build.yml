@@ -1,0 +1,125 @@
+#
+# test-build.yml
+# Do test builds to catch compile errors
+#
+
+name: CI
+
+on:
+  pull_request:
+    paths-ignore:
+    - config/**
+    - data/**
+    - docs/**
+    - '**/*.md'
+  push:
+    paths-ignore:
+    - config/**
+    - data/**
+    - docs/**
+    - '**/*.md'
+
+# Cancel PR runs superseded by a new push, so stacked runs don't queue up behind each other.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  test_builds:
+    name: ${{ matrix.name }}
+    if: github.repository == 'thisiskeithb/Marlin'
+
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        # The config as committed, on both board variants
+        - name: Default (512K)
+          env: BTT_BTT002_VET6
+          disable: ''
+        - name: Default (1MB)
+          env: BTT_BTT002
+          disable: ''
+        # Flip each MK3_* hardware option back to its stock fallback
+        - name: Default Fan Pins
+          env: BTT_BTT002_VET6
+          disable: MK3_FAN_PINS
+        - name: PINDA V2
+          env: BTT_BTT002_VET6
+          disable: MK3_HAS_SUPERPINDA
+        - name: TMC2209
+          env: BTT_BTT002_VET6
+          disable: MK3_BTT002_HAS_TMC5160_ON_XYZE
+        - name: E3D V6 Hotend
+          env: BTT_BTT002_VET6
+          disable: MK3_HAS_SLICE_MOSQUITO_HOTEND
+        - name: 40W Heater
+          env: BTT_BTT002_VET6
+          disable: MK3_HAS_SLICE_50W_HEATER_CARTRIDGE
+        - name: Stock Thermistor
+          env: BTT_BTT002_VET6
+          disable: MK3_HAS_SLICE_450C_THERMISTOR
+        # Every MK3_* option off at once
+        - name: All Stock
+          env: BTT_BTT002_VET6
+          disable: >-
+            MK3_FAN_PINS MK3_HAS_SUPERPINDA MK3_BTT002_HAS_TMC5160_ON_XYZE
+            MK3_HAS_SLICE_MOSQUITO_HOTEND MK3_HAS_SLICE_50W_HEATER_CARTRIDGE
+            MK3_HAS_SLICE_450C_THERMISTOR
+
+    steps:
+    - name: Check Out Commit
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+    - name: Select Python 3.9
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+      with:
+        python-version: '3.9'
+        architecture: 'x64'
+
+    - name: Install PlatformIO
+      run: |
+        pip install -U platformio
+
+    - name: Restore PlatformIO cache
+      id: pio-cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: |
+          ~/.platformio
+          .pio/libdeps
+        key: ${{ runner.os }}-pio-build-v1-${{ hashFiles('ini/*.ini', 'platformio.ini') }}
+        restore-keys: |
+          ${{ runner.os }}-pio-build-v1-
+
+    - name: Update PlatformIO packages
+      run: |
+        pio pkg update --global
+
+    - name: Apply Config Changes
+      if: matrix.disable != ''
+      env:
+        DISABLE: ${{ matrix.disable }}
+      run: |
+        # shellcheck disable=SC2086
+        buildroot/bin/opt_disable $DISABLE
+
+    - name: Build Marlin
+      run: pio run -e ${{ matrix.env }}
+
+    # Only push builds refresh the cache, so PR runs can't fill the repo cache quota.
+    # All matrix jobs share one key, so only the default job saves it.
+    - name: Save PlatformIO cache
+      if: github.event_name == 'push' && matrix.name == 'Default (512K)' && steps.pio-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: |
+          ~/.platformio
+          .pio/libdeps
+        key: ${{ steps.pio-cache.outputs.cache-primary-key }}
