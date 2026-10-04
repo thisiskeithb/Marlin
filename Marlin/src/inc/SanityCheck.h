@@ -40,6 +40,10 @@
   #error "Marlin requires C++11 support (gcc >= 4.7, Arduino IDE >= 1.6.8). Please upgrade your toolchain."
 #endif
 
+#if !(MK3_XYZE_DRIVER_IS(TMC2209) || MK3_XYZE_DRIVER_IS(TMC5160) || MK3_XYZE_DRIVER_IS(TMC2240))
+  #error "MK3_BTT002_XYZE_DRIVER_TYPE must be TMC2209, TMC5160, or TMC2240."
+#endif
+
 // Emit the GCC version
 //static_assert(false, "GCC version: " STRINGIFY(__GNUC__) "." STRINGIFY(__GNUC_MINOR__) "." STRINGIFY(__GNUC_PATCHLEVEL__));
 

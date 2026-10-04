@@ -782,7 +782,7 @@
   #if X_SPI_SENSORLESS || Y_SPI_SENSORLESS
     #warning "If SPI_ENDSTOPS are unreliable with QUICK_HOME try adjusting SENSORLESS_BACKOFF_MM, Travel Acceleration (M204 T), Homing Feedrate (M210 XY), or disable QUICK_HOME."
   #elif X_SENSORLESS || Y_SENSORLESS
-    #warning "If SENSORLESS_HOMING is unreliable with QUICK_HOME try adjusting SENSORLESS_BACKOFF_MM, Travel Acceleration (M204 T), Homing Feedrate (M210 XY), or disable QUICK_HOME."
+    // #warning "If SENSORLESS_HOMING is unreliable with QUICK_HOME try adjusting SENSORLESS_BACKOFF_MM, Travel Acceleration (M204 T), Homing Feedrate (M210 XY), or disable QUICK_HOME."
   #endif
 #endif
 
@@ -1050,3 +1050,13 @@
 #if DISABLED_HOST_DRIVE_WARNING
   #warning "The selected board has automatically enabled NO_SD_HOST_DRIVE."
 #endif
+
+/**
+ * Warn users of personal config
+ */
+#warning "This is my (thisiskeithb) personal config and can change at any time. Verify settings match your hardware before flashing."
+
+/**
+ * Please donate
+ */
+#warning "If you find this config helpful, please consider donating at https://github.com/sponsors/thisiskeithb or https://ko-fi.com/thisiskeithb"

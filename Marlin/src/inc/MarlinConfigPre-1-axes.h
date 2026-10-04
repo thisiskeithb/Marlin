@@ -40,6 +40,12 @@
 #include "../core/macros.h"
 #include "../core/boards.h"
 
+// MK3 config: test the shared X/Y/Z/E driver type. Must precede Configuration.h.
+#define _MK3_XYZE_TMC2209 1
+#define _MK3_XYZE_TMC5160 2
+#define _MK3_XYZE_TMC2240 3
+#define MK3_XYZE_DRIVER_IS(T) (CAT(_MK3_XYZE_, MK3_BTT002_XYZE_DRIVER_TYPE) == _MK3_XYZE_##T)
+
 #if USE_STD_CONFIGS
   #if __has_include("../../Configuration.h")
     #include "../../Configuration.h"
